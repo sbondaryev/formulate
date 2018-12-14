@@ -1,0 +1,24 @@
+{
+  "name": "formulatejs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC",
+  "scripts": {
+    "start": "npm run storybook ",
+    "storybook": "start-storybook -p 9001 -c .storybook"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.2.0",
+    "@storybook/react": "^4.1.1",
+    "babel-eslint": "10.0.1",
+    "babel-loader": "^8.0.4",
+    "eslint": "5.10.0",
+    "eslint-plugin-react": "7.11.1"
+  },
+  "dependencies": {
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3"
+  }
+}
