@@ -1,11 +1,14 @@
-const nearley = require("nearley")
-const grammar = require("./grammar")
+import React from 'react'
+import parse from './parser'
 
-const parser = new nearley.Parser(nearley.Grammar.fromCompiled(grammar))
+const InputArea = () =>
+  <input/>
 
-const parse = (srt) => {
-  parser.feed(srt)
-  return parser.results[0]
+const Formulate = () => {
+  console.log(parse("2/3/4"))
+  return <>
+    <InputArea/>
+  </>
 }
 
-export default parse
+export default Formulate
