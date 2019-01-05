@@ -4,6 +4,6 @@ import parse from '../src'
 
 storiesOf('Button', module)
   .add('with text', () => {
-    console.log(parse("foo\n"))
+    console.log(parse("2/3/4"))
     return <div>test</div>
   })
