@@ -5,7 +5,7 @@ const InputArea = () =>
   <input/>
 
 const Formulate = () => {
-  console.log(parse("2/3/4"))
+  console.log(JSON.stringify(parse("2/3/4")))
   return <>
     <InputArea/>
   </>
