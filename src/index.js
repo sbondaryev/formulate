@@ -1,6 +1,7 @@
 import React from 'react'
 import parse from './parser'
 import first from 'lodash/first'
+import tail from 'lodash/tail'
 import get from 'lodash/get'
 import map from 'lodash/map'
 import drop from 'lodash/drop'
@@ -8,6 +9,7 @@ import isString from 'lodash/isString'
 import isArray from 'lodash/isArray'
 import takeWhile from 'lodash/takeWhile'
 import dropWhile from 'lodash/dropWhile'
+import styled from 'styled-components'
 
 const InputArea = () =>
   <input/>
@@ -19,19 +21,31 @@ const isFormulaSeparator = (el) => first(el) == 'I'
 const isFormulaSymbol = (el) => isString(get(el, 1))
 const isFormulaArray = (el) => isArray(first(el))
 
+const FracStyled = styled.span`
+  display: inline-block;
+  vertical-align: -0.5em;
+`
+const NumeratorStyled = styled.span`
+  display: block;
+`
+const DenumeratorStyled = styled.span`
+  display: block;
+  border-top: 1px solid;
+`
+
 const renderFrac = (el) => {
   const children = drop(el, 2)
-  const numerator = takeWhile(children, ch => isFormulaSeparator(ch))
-  const denumerator = dropWhile(children, ch => isFormulaSeparator(ch))
-  return <span>
-    <span>{renderTree(numerator)}</span>
-    <span>{renderTree(denumerator)}</span>
-  </span>
+  const numerator = takeWhile(children, ch => !isFormulaSeparator(ch))
+  const denumerator = tail(dropWhile(children, ch => !isFormulaSeparator(ch)))
+  return <FracStyled key={first(el)}>
+    <NumeratorStyled>{renderTree(numerator)}</NumeratorStyled>
+    <DenumeratorStyled>{renderTree(denumerator)}</DenumeratorStyled>
+  </FracStyled>
 }
 
 const renderCursor = () => null
 const renderInput = () => null
-const renderSymbol = (el) => <span>{get(el, 1)}</span>
+const renderSymbol = (el) => <span key={first(el)}>{get(el, 1)}</span>
 
 const renderArray = (el) => map(el, renderTree)
 
