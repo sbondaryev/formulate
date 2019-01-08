@@ -11,6 +11,8 @@ import takeWhile from 'lodash/takeWhile'
 import dropWhile from 'lodash/dropWhile'
 import styled from 'styled-components'
 
+export const FormulateContext = React.createContext()
+
 const InputArea = () =>
   <input/>
 
@@ -45,7 +47,11 @@ const renderFrac = (el) => {
 
 const renderCursor = () => null
 const renderInput = () => null
-const renderSymbol = (el) => <span key={first(el)}>{get(el, 1)}</span>
+const renderSymbol = (el) => <FormulateContext.Consumer>
+  {({updateRefs}) => (
+    <span onClick={()=>updateRefs(first(el))} key={first(el)}>{get(el, 1)}</span>)}
+</FormulateContext.Consumer>
+
 
 const renderArray = (el) => map(el, renderTree)
 
@@ -68,10 +74,12 @@ const FormulaTree = ({tree}) => {
 }
 
 const Formulate = () => {
-  return <>
+  const updateRefs = ref => console.log('updateRefs', ref)
+
+  return <FormulateContext.Provider value={{updateRefs}}>
     <InputArea/>
     <FormulaTree tree={parse("2/3/4")} />
-  </>
+  </FormulateContext.Provider>
 }
 
 export default Formulate
