@@ -39,17 +39,26 @@ const renderFrac = (el) => {
   const children = drop(el, 2)
   const numerator = takeWhile(children, ch => !isFormulaSeparator(ch))
   const denumerator = tail(dropWhile(children, ch => !isFormulaSeparator(ch)))
-  return <FracStyled key={first(el)}>
-    <NumeratorStyled>{renderTree(numerator)}</NumeratorStyled>
-    <DenumeratorStyled>{renderTree(denumerator)}</DenumeratorStyled>
-  </FracStyled>
+  return <FormulateContext.Consumer>
+    {({updateRefs}) => (
+      <FracStyled
+        key={first(el)}
+        ref={(elref) => updateRefs(first(el), elref)}
+      >
+        <NumeratorStyled>{renderTree(numerator)}</NumeratorStyled>
+        <DenumeratorStyled>{renderTree(denumerator)}</DenumeratorStyled>
+      </FracStyled>)}
+  </FormulateContext.Consumer>
 }
 
 const renderCursor = () => null
 const renderInput = () => null
 const renderSymbol = (el) => <FormulateContext.Consumer>
   {({updateRefs}) => (
-    <span onClick={()=>updateRefs(first(el))} key={first(el)}>{get(el, 1)}</span>)}
+    <span
+      key={first(el)}
+      ref={(elref) => updateRefs(first(el), elref)}
+    >{get(el, 1)}</span>)}
 </FormulateContext.Consumer>
 
 
@@ -74,7 +83,8 @@ const FormulaTree = ({tree}) => {
 }
 
 const Formulate = () => {
-  const updateRefs = ref => console.log('updateRefs', ref)
+  const updateRefs = (id, elref) =>
+    console.log('updateRefs', id, elref.getBoundingClientRect())
 
   return <FormulateContext.Provider value={{updateRefs}}>
     <InputArea/>
