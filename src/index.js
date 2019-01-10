@@ -1,8 +1,9 @@
 import React from 'react'
 import parse from './parser'
 import first from 'lodash/first'
-import unset from 'lodash/unset'
+import omit from 'lodash/omit'
 import tail from 'lodash/tail'
+import merge from 'lodash/merge'
 import get from 'lodash/get'
 import map from 'lodash/map'
 import drop from 'lodash/drop'
@@ -40,10 +41,9 @@ const renderFrac = (el) => {
   const children = drop(el, 2)
   const numerator = takeWhile(children, ch => !isFormulaSeparator(ch))
   const denumerator = tail(dropWhile(children, ch => !isFormulaSeparator(ch)))
-  return <FormulateContext.Consumer>
+  return <FormulateContext.Consumer key={first(el)}>
     {({updateRefs}) => (
       <FracStyled
-        key={first(el)}
         ref={(elref) => updateRefs(first(el), elref)}
       >
         <NumeratorStyled>{renderTree(numerator)}</NumeratorStyled>
@@ -54,10 +54,9 @@ const renderFrac = (el) => {
 
 const renderCursor = () => null
 const renderInput = () => null
-const renderSymbol = (el) => <FormulateContext.Consumer>
+const renderSymbol = (el) => <FormulateContext.Consumer key={first(el)}>
   {({updateRefs}) => (
     <span
-      key={first(el)}
       ref={(elref) => updateRefs(first(el), elref)}
     >{get(el, 1)}</span>)}
 </FormulateContext.Consumer>
@@ -83,20 +82,27 @@ const FormulaTree = ({tree}) => {
   </div>
 }
 
-const Formulate = () => {
-  let refs = {}
-  const updateRefs = (id, elref) => {
-    if (elref) {
-      refs[id] = elref
-    } else {
-      unset(refs, id)
+class Formulate extends React.Component {
+  refs = {}
+  constructor(props) {
+    super(props)
+    this.state = {
+      tree: parse("2/3/4")
     }
   }
 
-  return <FormulateContext.Provider value={{updateRefs}}>
-    <InputArea/>
-    <FormulaTree tree={parse("2/3/4")} />
-  </FormulateContext.Provider>
+  updateRefs = (id, elref) => {
+    this.refs = elref
+      ? merge({}, this.refs, {[id]:elref})
+      : omit(this.refs, id)
+  }
+
+  render() {
+    return <FormulateContext.Provider value={{updateRefs: this.updateRefs}}>
+      <InputArea/>
+      <FormulaTree tree={this.state.tree} />
+    </FormulateContext.Provider>
+  }
 }
 
 export default Formulate
