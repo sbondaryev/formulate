@@ -1,6 +1,7 @@
 import React from 'react'
 import parse from './parser'
 import first from 'lodash/first'
+import unset from 'lodash/unset'
 import tail from 'lodash/tail'
 import get from 'lodash/get'
 import map from 'lodash/map'
@@ -83,8 +84,14 @@ const FormulaTree = ({tree}) => {
 }
 
 const Formulate = () => {
-  const updateRefs = (id, elref) =>
-    console.log('updateRefs', id, elref.getBoundingClientRect())
+  let refs = {}
+  const updateRefs = (id, elref) => {
+    if (elref) {
+      refs[id] = elref
+    } else {
+      unset(refs, id)
+    }
+  }
 
   return <FormulateContext.Provider value={{updateRefs}}>
     <InputArea/>
