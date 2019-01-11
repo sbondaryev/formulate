@@ -9,19 +9,25 @@ import map from 'lodash/map'
 import drop from 'lodash/drop'
 import isString from 'lodash/isString'
 import isArray from 'lodash/isArray'
+import concat from 'lodash/concat'
+import isEqual from 'lodash/isEqual'
 import takeWhile from 'lodash/takeWhile'
 import dropWhile from 'lodash/dropWhile'
 import styled from 'styled-components'
 
 export const FormulateContext = React.createContext()
 
-const InputArea = () =>
-  <input/>
+const SEPARATOR = ['I']
+const CURSOR = ['C']
+const FORMULAINPUT = ['F']
+
+const InputArea = ({onFocus}) =>
+  <input onFocus={onFocus}/>
 
 const isFormulaFrac = (el) => get(el, 1) == 'frac'
-const isFormulaCursor = (el) => first(el) == 'C'
-const isFormulaInput = (el) => first(el) == 'F'
-const isFormulaSeparator = (el) => first(el) == 'I'
+const isFormulaCursor = (el) => isEqual(el, CURSOR)
+const isFormulaInput = (el) => isEqual(el, FORMULAINPUT)
+const isFormulaSeparator = (el) => isEqual(el, SEPARATOR)
 const isFormulaSymbol = (el) => isString(get(el, 1))
 const isFormulaArray = (el) => isArray(first(el))
 
@@ -52,7 +58,13 @@ const renderFrac = (el) => {
   </FormulateContext.Consumer>
 }
 
-const renderCursor = () => null
+const renderCursor = (el) => <FormulateContext.Consumer key={first(el)}>
+  {({updateRefs}) => (
+    <span
+      ref={(elref) => updateRefs(first(el), elref)}
+    >|</span>)}
+</FormulateContext.Consumer>
+
 const renderInput = () => null
 const renderSymbol = (el) => <FormulateContext.Consumer key={first(el)}>
   {({updateRefs}) => (
@@ -65,7 +77,6 @@ const renderSymbol = (el) => <FormulateContext.Consumer key={first(el)}>
 const renderArray = (el) => map(el, renderTree)
 
 const renderTree = (el) => {
-  console.log(JSON.stringify(el))
   switch (true) {
     case isFormulaFrac(el) : return renderFrac(el)
     case isFormulaCursor(el) : return renderCursor(el)
@@ -97,9 +108,16 @@ class Formulate extends React.Component {
       : omit(this.refs, id)
   }
 
+  onFocus = () => {
+    const tree = get(this.state, 'tree')
+    this.setState({
+      tree: concat(tree, [CURSOR])
+    })
+  }
+
   render() {
     return <FormulateContext.Provider value={{updateRefs: this.updateRefs}}>
-      <InputArea/>
+      <InputArea onFocus={this.onFocus} />
       <FormulaTree tree={this.state.tree} />
     </FormulateContext.Provider>
   }
