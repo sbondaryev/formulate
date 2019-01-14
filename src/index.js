@@ -2,7 +2,6 @@ import React from 'react'
 import parse from './parser'
 import first from 'lodash/first'
 import omit from 'lodash/omit'
-import tail from 'lodash/tail'
 import merge from 'lodash/merge'
 import get from 'lodash/get'
 import map from 'lodash/map'
@@ -10,10 +9,16 @@ import drop from 'lodash/drop'
 import isString from 'lodash/isString'
 import isArray from 'lodash/isArray'
 import concat from 'lodash/concat'
+import reduce from 'lodash/reduce'
+import initial from 'lodash/initial'
+import last from 'lodash/last'
 import isEqual from 'lodash/isEqual'
-import takeWhile from 'lodash/takeWhile'
-import dropWhile from 'lodash/dropWhile'
 import styled from 'styled-components'
+
+const splitBy = (col, pred) => reduce(col, (m, e) => pred(e)
+  ? concat(m, [[]])
+  : concat(initial(m), [concat(last(m), [e])])
+, [[]])
 
 export const FormulateContext = React.createContext()
 
@@ -44,9 +49,9 @@ const DenumeratorStyled = styled.span`
 `
 
 const renderFrac = (el) => {
-  const children = drop(el, 2)
-  const numerator = takeWhile(children, ch => !isFormulaSeparator(ch))
-  const denumerator = tail(dropWhile(children, ch => !isFormulaSeparator(ch)))
+  const children = splitBy(drop(el, 2), isFormulaSeparator)
+  const numerator = get(children, 0)
+  const denumerator = get(children, 1)
   return <FormulateContext.Consumer key={first(el)}>
     {({updateRefs}) => (
       <FracStyled
