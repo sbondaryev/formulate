@@ -5,6 +5,7 @@ import omit from 'lodash/omit'
 import merge from 'lodash/merge'
 import get from 'lodash/get'
 import map from 'lodash/map'
+import take from 'lodash/take'
 import drop from 'lodash/drop'
 import isString from 'lodash/isString'
 import isArray from 'lodash/isArray'
@@ -48,53 +49,10 @@ const DenumeratorStyled = styled.span`
   border-top: 1px solid;
 `
 
-const renderFrac = (el) => {
-  const children = splitBy(drop(el, 2), isFormulaSeparator)
-  const numerator = get(children, 0)
-  const denumerator = get(children, 1)
-  return <FormulateContext.Consumer key={first(el)}>
-    {({updateRefs}) => (
-      <FracStyled
-        ref={(elref) => updateRefs(first(el), elref)}
-      >
-        <NumeratorStyled>{renderTree(numerator)}</NumeratorStyled>
-        <DenumeratorStyled>{renderTree(denumerator)}</DenumeratorStyled>
-      </FracStyled>)}
-  </FormulateContext.Consumer>
-}
-
-const renderCursor = (el) => <FormulateContext.Consumer key={first(el)}>
-  {({updateRefs}) => (
-    <span
-      ref={(elref) => updateRefs(first(el), elref)}
-    >|</span>)}
-</FormulateContext.Consumer>
-
-const renderInput = () => null
-const renderSymbol = (el) => <FormulateContext.Consumer key={first(el)}>
-  {({updateRefs}) => (
-    <span
-      ref={(elref) => updateRefs(first(el), elref)}
-    >{get(el, 1)}</span>)}
-</FormulateContext.Consumer>
-
-
-const renderArray = (el) => map(el, renderTree)
-
-const renderTree = (el) => {
-  switch (true) {
-    case isFormulaFrac(el) : return renderFrac(el)
-    case isFormulaCursor(el) : return renderCursor(el)
-    case isFormulaInput(el) : return renderInput(el)
-    case isFormulaSymbol(el) : return renderSymbol(el)
-    case isFormulaArray(el) : return renderArray(el)
-    default: return null
-  }
-}
-
 const FormulaTree = ({tree}) => {
+  const evaluatedTree = evalTree(tree, renderTree)
   return <div>
-    {renderTree(tree)}
+    {evaluatedTree}
   </div>
 }
 
@@ -129,3 +87,79 @@ class Formulate extends React.Component {
 }
 
 export default Formulate
+
+//Tree traversal
+const evalTree = (tree, applyTree) => {
+  switch (true) {
+    case isFormulaArray(tree) : return evalArray(tree, applyTree)
+    case isFormulaSeparator(tree) : return evalSeparator(tree, applyTree)
+    case isFormulaFrac(tree) : return evalFrac(tree, applyTree)
+    case isFormulaCursor(tree) : return evalCursor(tree, applyTree)
+    case isFormulaInput(tree) : return evalInput(tree, applyTree)
+    case isFormulaSymbol(tree) : return evalSymbol(tree, applyTree)
+    default: return null
+  }
+}
+
+const evalArray = (tree, applyTree) =>
+  map(tree, el => evalTree(el, applyTree))
+
+const evalSeparator = (tree) =>
+  tree
+
+const evalFrac = (tree, applyTree) => {
+  const base = take(tree, 2)
+  const children = splitBy(drop(tree, 2), isFormulaSeparator)
+  const numerator = evalTree(get(children, 0), applyTree)
+  const denumerator = evalTree(get(children, 1), applyTree)
+  return applyTree(concat(base, numerator, [SEPARATOR], denumerator))
+}
+
+const evalCursor = (tree, applyTree) =>
+  applyTree(tree)
+
+const evalInput = (tree) =>
+  tree
+
+const evalSymbol = (tree, applyTree) =>
+  applyTree(tree)
+
+
+// Rendering
+const renderTree = el => {
+  switch (true) {
+    case isFormulaFrac(el) : return renderFrac(el)
+    case isFormulaCursor(el) : return renderCursor(el)
+    case isFormulaSymbol(el) : return renderSymbol(el)
+    default: return el
+  }
+}
+
+const renderFrac = (el) => {
+  const children = splitBy(drop(el, 2), isFormulaSeparator)
+  const numerator = get(children, 0)
+  const denumerator = get(children, 1)
+  return <FormulateContext.Consumer key={first(el)}>
+    {({updateRefs}) => (
+      <FracStyled
+        ref={(elref) => updateRefs(first(el), elref)}
+      >
+        <NumeratorStyled>{numerator}</NumeratorStyled>
+        <DenumeratorStyled>{denumerator}</DenumeratorStyled>
+      </FracStyled>)}
+  </FormulateContext.Consumer>
+}
+
+const renderCursor = (el) => <FormulateContext.Consumer key={first(el)}>
+  {({updateRefs}) => (
+    <span
+      ref={(elref) => updateRefs(first(el), elref)}
+    >|</span>)}
+</FormulateContext.Consumer>
+
+const renderSymbol = (el) => <FormulateContext.Consumer key={first(el)}>
+  {({updateRefs}) => (
+    <span
+      ref={(elref) => updateRefs(first(el), elref)}
+    >{get(el, 1)}</span>)}
+</FormulateContext.Consumer>
