@@ -14,10 +14,19 @@ var grammar = {
     {"name": "expr", "symbols": ["expr$ebnf$1"], "postprocess": id},
     {"name": "frac$subexpression$1", "symbols": ["sym"]},
     {"name": "frac$subexpression$1", "symbols": ["frac"]},
-    {"name": "frac", "symbols": ["sym", {"literal":"/"}, "frac$subexpression$1"], "postprocess": (d) => [uniqueId('G_'), 'frac', d[0], ['I'], d[2][0]]},
+    {"name": "frac", "symbols": ["sym", {"literal":"/"}, "frac$subexpression$1"], "postprocess":  (d) => ({
+          id: uniqueId('G_'),
+          type: 'frac',
+          numerator: d[0],
+          denumerator: d[2][0]
+        }) },
     {"name": "sym$subexpression$1", "symbols": ["operation"]},
     {"name": "sym$subexpression$1", "symbols": ["number"]},
-    {"name": "sym", "symbols": ["sym$subexpression$1"], "postprocess": (d) => [uniqueId('G_'), d[0][0]]},
+    {"name": "sym", "symbols": ["sym$subexpression$1"], "postprocess":  (d) => ({
+          id: uniqueId('G_'),
+          type: 'symbol',
+          value: d[0][0]
+        }) },
     {"name": "operation", "symbols": [/[+\-*]/], "postprocess": id},
     {"name": "number", "symbols": [/[0-9]/], "postprocess": id}
 ]

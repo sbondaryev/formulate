@@ -1,41 +1,24 @@
 import React from 'react'
 import parse from './parser'
-import first from 'lodash/first'
 import omit from 'lodash/omit'
 import merge from 'lodash/merge'
 import get from 'lodash/get'
 import map from 'lodash/map'
-import take from 'lodash/take'
-import drop from 'lodash/drop'
-import isString from 'lodash/isString'
 import isArray from 'lodash/isArray'
 import concat from 'lodash/concat'
-import reduce from 'lodash/reduce'
-import initial from 'lodash/initial'
-import last from 'lodash/last'
-import isEqual from 'lodash/isEqual'
 import styled from 'styled-components'
-
-const splitBy = (col, pred) => reduce(col, (m, e) => pred(e)
-  ? concat(m, [[]])
-  : concat(initial(m), [concat(last(m), [e])])
-, [[]])
 
 export const FormulateContext = React.createContext()
 
-const SEPARATOR = ['I']
-const CURSOR = ['C']
-const FORMULAINPUT = ['F']
+const CURSOR = {type: 'cursor'}
 
 const InputArea = ({onFocus}) =>
   <input onFocus={onFocus}/>
 
-const isFormulaFrac = (el) => get(el, 1) == 'frac'
-const isFormulaCursor = (el) => isEqual(el, CURSOR)
-const isFormulaInput = (el) => isEqual(el, FORMULAINPUT)
-const isFormulaSeparator = (el) => isEqual(el, SEPARATOR)
-const isFormulaSymbol = (el) => isString(get(el, 1))
-const isFormulaArray = (el) => isArray(first(el))
+const isFrac = (el) => get(el, 'type') == 'frac'
+const isCursor = (el) => get(el, 'type') == 'cursor'
+const isInput = (el) => get(el, 'type') == 'formula-input'
+const isSymbol = (el) => get(el, 'type') == 'symbol'
 
 const FracStyled = styled.span`
   display: inline-block;
@@ -91,12 +74,11 @@ export default Formulate
 //Tree traversal
 const evalTree = (tree, applyTree) => {
   switch (true) {
-    case isFormulaArray(tree) : return evalArray(tree, applyTree)
-    case isFormulaSeparator(tree) : return evalSeparator(tree, applyTree)
-    case isFormulaFrac(tree) : return evalFrac(tree, applyTree)
-    case isFormulaCursor(tree) : return evalCursor(tree, applyTree)
-    case isFormulaInput(tree) : return evalInput(tree, applyTree)
-    case isFormulaSymbol(tree) : return evalSymbol(tree, applyTree)
+    case isArray(tree) : return evalArray(tree, applyTree)
+    case isFrac(tree) : return evalFrac(tree, applyTree)
+    case isCursor(tree) : return evalCursor(tree, applyTree)
+    case isInput(tree) : return evalInput(tree, applyTree)
+    case isSymbol(tree) : return evalSymbol(tree, applyTree)
     default: return null
   }
 }
@@ -104,15 +86,10 @@ const evalTree = (tree, applyTree) => {
 const evalArray = (tree, applyTree) =>
   map(tree, el => evalTree(el, applyTree))
 
-const evalSeparator = (tree) =>
-  tree
-
 const evalFrac = (tree, applyTree) => {
-  const base = take(tree, 2)
-  const children = splitBy(drop(tree, 2), isFormulaSeparator)
-  const numerator = evalTree(get(children, 0), applyTree)
-  const denumerator = evalTree(get(children, 1), applyTree)
-  return applyTree(concat(base, numerator, [SEPARATOR], denumerator))
+  const numerator = evalTree(get(tree, 'numerator'), applyTree)
+  const denumerator = evalTree(get(tree, 'denumerator'), applyTree)
+  return applyTree({...tree, numerator, denumerator})
 }
 
 const evalCursor = (tree, applyTree) =>
@@ -128,21 +105,21 @@ const evalSymbol = (tree, applyTree) =>
 // Rendering
 const renderTree = el => {
   switch (true) {
-    case isFormulaFrac(el) : return renderFrac(el)
-    case isFormulaCursor(el) : return renderCursor(el)
-    case isFormulaSymbol(el) : return renderSymbol(el)
+    case isFrac(el) : return renderFrac(el)
+    case isCursor(el) : return renderCursor(el)
+    case isSymbol(el) : return renderSymbol(el)
     default: return el
   }
 }
 
 const renderFrac = (el) => {
-  const children = splitBy(drop(el, 2), isFormulaSeparator)
-  const numerator = get(children, 0)
-  const denumerator = get(children, 1)
-  return <FormulateContext.Consumer key={first(el)}>
+  const id = get(el, 'id')
+  const numerator = get(el, 'numerator')
+  const denumerator = get(el, 'denumerator')
+  return <FormulateContext.Consumer key={id}>
     {({updateRefs}) => (
       <FracStyled
-        ref={(elref) => updateRefs(first(el), elref)}
+        ref={(elref) => updateRefs(id, elref)}
       >
         <NumeratorStyled>{numerator}</NumeratorStyled>
         <DenumeratorStyled>{denumerator}</DenumeratorStyled>
@@ -150,16 +127,23 @@ const renderFrac = (el) => {
   </FormulateContext.Consumer>
 }
 
-const renderCursor = (el) => <FormulateContext.Consumer key={first(el)}>
-  {({updateRefs}) => (
-    <span
-      ref={(elref) => updateRefs(first(el), elref)}
-    >|</span>)}
-</FormulateContext.Consumer>
+const renderCursor = (el) => {
+  const id = get(el, 'type')
+  return <FormulateContext.Consumer key={id}>
+    {({updateRefs}) => (
+      <span
+        ref={(elref) => updateRefs(id, elref)}
+      >|</span>)}
+  </FormulateContext.Consumer>
+}
 
-const renderSymbol = (el) => <FormulateContext.Consumer key={first(el)}>
-  {({updateRefs}) => (
-    <span
-      ref={(elref) => updateRefs(first(el), elref)}
-    >{get(el, 1)}</span>)}
-</FormulateContext.Consumer>
+const renderSymbol = (el) => {
+  const id = get(el, 'id')
+  const value = get(el, 'value')
+  return <FormulateContext.Consumer key={id}>
+    {({updateRefs}) => (
+      <span
+        ref={(elref) => updateRefs(id, elref)}
+      >{value}</span>)}
+  </FormulateContext.Consumer>
+}
