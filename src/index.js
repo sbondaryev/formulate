@@ -6,14 +6,16 @@ import get from 'lodash/get'
 import map from 'lodash/map'
 import isArray from 'lodash/isArray'
 import concat from 'lodash/concat'
+import compact from 'lodash/compact'
 import styled from 'styled-components'
 
 export const FormulateContext = React.createContext()
 
 const CURSOR = {type: 'cursor'}
 
-const InputArea = ({onFocus}) =>
-  <input onFocus={onFocus}/>
+const StyledInput = styled.input`
+  color: red;
+`
 
 const isFrac = (el) => get(el, 'type') == 'frac'
 const isCursor = (el) => get(el, 'type') == 'cursor'
@@ -54,16 +56,19 @@ class Formulate extends React.Component {
       : omit(this.refs, id)
   }
 
-  onFocus = () => {
-    const tree = get(this.state, 'tree')
-    this.setState({
-      tree: concat(tree, [CURSOR])
-    })
-  }
+  onFocus = () =>
+    this.setState((state) => ({
+      tree: concat(get(state, 'tree'), [CURSOR])
+    }))
+
+  onBlur = () =>
+    this.setState((state) => ({
+      tree: evalTree(get(state, 'tree'), removeCursor)
+    }))
 
   render() {
     return <FormulateContext.Provider value={{updateRefs: this.updateRefs}}>
-      <InputArea onFocus={this.onFocus} />
+      <StyledInput onFocus={this.onFocus} onBlur={this.onBlur} />
       <FormulaTree tree={this.state.tree} />
     </FormulateContext.Provider>
   }
@@ -84,7 +89,7 @@ const evalTree = (tree, applyTree) => {
 }
 
 const evalArray = (tree, applyTree) =>
-  map(tree, el => evalTree(el, applyTree))
+  compact(map(tree, el => evalTree(el, applyTree)))
 
 const evalFrac = (tree, applyTree) => {
   const numerator = evalTree(get(tree, 'numerator'), applyTree)
@@ -101,6 +106,13 @@ const evalInput = (tree) =>
 const evalSymbol = (tree, applyTree) =>
   applyTree(tree)
 
+
+const removeCursor = el => {
+  switch (true) {
+    case isCursor(el) : return undefined
+    default: return el
+  }
+}
 
 // Rendering
 const renderTree = el => {
