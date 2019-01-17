@@ -7,15 +7,19 @@
   "license": "ISC",
   "scripts": {
     "start": "npm run storybook ",
-    "storybook": "start-storybook -p 9001 -c .storybook"
+    "storybook": "start-storybook -p 9001 -c .storybook",
+    "test": "jest"
   },
   "devDependencies": {
     "@babel/core": "7.2.0",
     "@storybook/react": "4.1.1",
+    "babel-core": "7.0.0-bridge.0",
     "babel-eslint": "10.0.1",
     "babel-loader": "8.0.4",
     "eslint": "5.10.0",
-    "eslint-plugin-react": "7.11.1"
+    "eslint-plugin-react": "7.11.1",
+    "jest": "23.6.0",
+    "regenerator-runtime": "0.13.1"
   },
   "dependencies": {
     "lodash": "4.17.11",
