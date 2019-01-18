@@ -1,5 +1,8 @@
-const {sum} = require('../src/position')
+const {findClosestRectangle} = require('../src/position')
 
-test('adds 1 + 2 to equal 3', () => {
-  expect(sum(1, 2)).toBe(3)
+test('findClosestRectangle', () => {
+
+  expect(findClosestRectangle([3, 8, 5, 4], [[2, 9, 6, 3]]))
+    .toEqual([ 2, 9, 6, 3 ])
+
 })
