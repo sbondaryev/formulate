@@ -27,3 +27,16 @@ export const isEnclosing = (pos, rectangles) => {
   return !!find(([rt, rr, rb, rl]) =>
     t >=  rt && r <= rr && b <= rb && l >= rl, rcs)
 }
+
+export const  rectanglesInRectangleAll = (pos, rectangles) => {
+  const [t, r, b, l] = pos
+  return flow(
+    filter(rec => !isEqual(rec, pos)),
+    filter(([rt, rr, rb, rl]) => t <= rt && r >= rr && b >= rb && l <= rl)
+  )(rectangles)
+}
+
+export const  rectanglesInRectangle = (pos, rectangles) => {
+  const rcs = rectanglesInRectangleAll(pos, rectangles)
+  return filter(r => !isEnclosing(r, rcs), rcs)
+}
