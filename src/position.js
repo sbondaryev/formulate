@@ -1,6 +1,7 @@
 import flow from "lodash/fp/flow"
 import filter from "lodash/fp/filter"
 import sortBy from "lodash/fp/sortBy"
+import orderBy from "lodash/orderBy"
 import get from "lodash/fp/get"
 import find from "lodash/fp/find"
 import isEqual from "lodash/fp/isEqual"
@@ -39,4 +40,10 @@ export const  rectanglesInRectangleAll = (pos, rectangles) => {
 export const  rectanglesInRectangle = (pos, rectangles) => {
   const rcs = rectanglesInRectangleAll(pos, rectangles)
   return filter(r => !isEnclosing(r, rcs), rcs)
+}
+
+export const firstInRectangle = (pos, rectangles) => {
+  const rects = rectanglesInRectangle(pos, rectangles)
+  const sortedRecs = orderBy(rects, ([t, r, b, l]) => [t, l])
+  return get([0], sortedRecs)
 }
