@@ -4,7 +4,8 @@ const {
   isEnclosing,
   rectanglesInRectangleAll,
   rectanglesInRectangle,
-  firstInRectangle
+  firstInRectangle,
+  lastInRectangle
 } = require('../src/position')
 
 test('findClosestRectangle', () => {
@@ -52,5 +53,13 @@ test('firstInRectangle', () => {
 
   expect(firstInRectangle([1, 10, 10, 1], [[1, 10, 10, 1], [6, 5, 9, 2], [2, 5, 5, 2], [2, 9, 9, 6],]))
     .toEqual([2, 5, 5, 2])
+
+})
+
+
+test('lastInRectangle', () => {
+
+  expect(lastInRectangle([1, 10, 10, 1], [[1, 10, 10, 1], [6, 5, 9, 2], [2, 5, 5, 2], [2, 9, 9, 6],]))
+    .toEqual([6, 5, 9, 2])
 
 })

@@ -44,6 +44,20 @@ export const  rectanglesInRectangle = (pos, rectangles) => {
 
 export const firstInRectangle = (pos, rectangles) => {
   const rects = rectanglesInRectangle(pos, rectangles)
-  const sortedRecs = orderBy(rects, ([t, r, b, l]) => [t, l])
-  return get([0], sortedRecs)
+  return flow(
+    sortBy(([t]) => t),
+    sortBy(([t, r, b, l]) => l),
+    get([0])
+  )(rects)
+}
+
+
+export const lastInRectangle = (pos, rectangles) => {
+  const rects = rectanglesInRectangle(pos, rectangles)
+  return flow(
+    rectanglesInRectangle(pos),
+    sortBy(([t]) => -t),
+    sortBy(([t, r]) => r),
+    get([0])
+  )(rects)
 }
