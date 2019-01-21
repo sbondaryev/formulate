@@ -1,7 +1,6 @@
 import flow from "lodash/fp/flow"
 import filter from "lodash/fp/filter"
 import sortBy from "lodash/fp/sortBy"
-import orderBy from "lodash/orderBy"
 import get from "lodash/fp/get"
 import find from "lodash/fp/find"
 import isEqual from "lodash/fp/isEqual"
