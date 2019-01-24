@@ -8,7 +8,8 @@ const {
   lastInRectangle,
   firstRight,
   firstLeft,
-  firstBottom
+  firstBottom,
+  firstTop
 } = require('../src/position')
 
 test('findClosestRectangle', () => {
@@ -90,4 +91,10 @@ test('firstBottom', () => {
 
   expect(firstBottom([1, 10, 10, 1], [[11, 10, 21, 1], [11, 20, 21, 11]]))
     .toEqual([11, 10, 21, 1])
+})
+
+test('firstTop', () => {
+
+  expect(firstTop([11, 10, 20, 1], [[1, 10, 10, 1], [1, 20, 10, 11]]))
+    .toEqual([1, 20, 10, 11])
 })

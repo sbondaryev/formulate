@@ -93,3 +93,14 @@ export const firstBottom = (pos, rectangles) => {
     get([0])
   )(rectangles)
 }
+
+export const firstTop = (pos, rectangles) => {
+  const [t, r, b, l] = pos
+  return flow(
+    filter(rec => !isEqual(rec, pos)),
+    filter(([rt, rr, rb]) =>  rb < b),
+    sortBy(([t]) => t),
+    sortBy(([t, r]) => -r),
+    get([0])
+  )(rectangles)
+}
