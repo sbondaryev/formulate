@@ -114,10 +114,21 @@ export const distanse = (x1, y1, x2, y2) => {
 export const closestTopR = (pos, rectangles) => {
   const [t, r, b, l] = pos
   const y = (t + b) / 2
-  const x = (r + l) /2
+  const x = (r + l) / 2
   return flow(
     filter(([rt, rr, rb, rl]) => t > rt && b > rb),
     sortBy(([rt, rr, rb, rl]) => distanse(x, y, rr, rb)),
+    get([0])
+  )(rectangles)
+}
+
+export const closestTopL = (pos, rectangles) => {
+  const [t, r, b, l] = pos
+  const y = (t + b) / 2
+  const x = (r + l) / 2
+  return flow(
+    filter(([rt, rr, rb, rl]) => t > rt && b > rb),
+    sortBy(([rt, rr, rb, rl]) => distanse(x, y, rl, rb)),
     get([0])
   )(rectangles)
 }
