@@ -105,7 +105,7 @@ export const firstTop = (pos, rectangles) => {
   )(rectangles)
 }
 
-export const distanse = (x1, y1, x2, y2) => {
+export const distance = (x1, y1, x2, y2) => {
   const x = x2 - x1
   const y = y2 - y1
   return Math.sqrt(x*x+y*y)
@@ -117,7 +117,7 @@ export const closestTopR = (pos, rectangles) => {
   const x = (r + l) / 2
   return flow(
     filter(([rt, rr, rb, rl]) => t > rt && b > rb),
-    sortBy(([rt, rr, rb, rl]) => distanse(x, y, rr, rb)),
+    sortBy(([rt, rr, rb, rl]) => distance(x, y, rr, rb)),
     get([0])
   )(rectangles)
 }
@@ -128,7 +128,22 @@ export const closestTopL = (pos, rectangles) => {
   const x = (r + l) / 2
   return flow(
     filter(([rt, rr, rb, rl]) => t > rt && b > rb),
-    sortBy(([rt, rr, rb, rl]) => distanse(x, y, rl, rb)),
+    sortBy(([rt, rr, rb, rl]) => distance(x, y, rl, rb)),
     get([0])
   )(rectangles)
+}
+
+
+export const closestTop = (pos, rectangles) => {
+  const [t, r, b, l] = pos
+  const y = (t + b) / 2
+  const x = (r + l) / 2
+  const recl = closestTopL(pos, rectangles)
+  const recr = closestTopR(pos, rectangles)
+  const [recl_t, recl_r, recl_b, recl_l] = recl
+  const [recr_t, recr_r, recr_b, rect_l] = recr
+
+  return distance(x, y, recl_l, recl_b) < distance(x, y, recr_r, recr_b)
+    ? [recl, 'left']
+    : [recr, 'right']
 }
