@@ -147,3 +147,14 @@ export const closestTop = (pos, rectangles) => {
     ? [recl, 'left']
     : [recr, 'right']
 }
+
+export const closestBottomR = (pos, rectangles) => {
+  const [t, r, b, l] = pos
+  const y = (t + b) / 2
+  const x = (r + l) / 2
+  return flow(
+    filter(([rt, rr, rb, rl]) => t < rt && b < rb),
+    sortBy(([rt, rr, rb, rl]) => distance(x, y, rr, rb)),
+    get([0])
+  )(rectangles)
+}
