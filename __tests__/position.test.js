@@ -15,7 +15,8 @@ const {
   closestTopL,
   closestTop,
   closestBottomR,
-  closestBottomL
+  closestBottomL,
+  closestBottom
 } = require('../src/position')
 
 test('findClosestRectangle', () => {
@@ -129,4 +130,9 @@ test('closestBottomR', () => {
 test('closestBottomL', () => {
   expect(closestBottomL([10, 18, 20, 13], [[21, 5, 25, 1], [30, 15, 35, 2], [21, 20, 25, 15]]))
     .toEqual([21, 20, 25, 15])
+})
+
+test('closestBottom', () => {
+  expect(closestBottom([0, 10, 10, 0], [[10, 30, 15, 1], [10, 15, 19, 2], [16, 20, 19, 16]]))
+    .toEqual([[10, 30, 15, 1], "left"])
 })

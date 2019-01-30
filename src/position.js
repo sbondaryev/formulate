@@ -169,3 +169,17 @@ export const closestBottomL = (pos, rectangles) => {
     get([0])
   )(rectangles)
 }
+
+export const closestBottom = (pos, rectangles) => {
+  const [t, r, b, l] = pos
+  const y = (t + b) / 2
+  const x = (r + l) / 2
+  const recl = closestBottomL(pos, rectangles)
+  const recr = closestBottomR(pos, rectangles)
+  const [recl_t, recl_r, recl_b, recl_l] = recl
+  const [recr_t, recr_r, recr_b, rect_l] = recr
+
+  return distance(x, y, recl_l, recl_b) < distance(x, y, recr_r, recr_b)
+    ? [recl, 'left']
+    : [recr, 'right']
+}
