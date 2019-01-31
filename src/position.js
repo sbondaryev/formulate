@@ -1,9 +1,10 @@
-import flow from "lodash/fp/flow"
-import filter from "lodash/fp/filter"
-import sortBy from "lodash/fp/sortBy"
-import get from "lodash/fp/get"
-import find from "lodash/fp/find"
-import isEqual from "lodash/fp/isEqual"
+import flow from 'lodash/fp/flow'
+import filter from 'lodash/fp/filter'
+import sortBy from 'lodash/fp/sortBy'
+import get from 'lodash/fp/get'
+import find from 'lodash/fp/find'
+import isEqual from 'lodash/fp/isEqual'
+import findKey from 'lodash/findKey'
 
 const enclosingRectangles = (pos, rectangles) => {
   const [t, r, b, l] = pos
@@ -183,3 +184,6 @@ export const closestBottom = (pos, rectangles) => {
     ? [recl, 'left']
     : [recr, 'right']
 }
+
+export const findRef = (pos, rectanglesHash) =>
+  findKey(rectanglesHash, rec => isEqual(rec, pos))
