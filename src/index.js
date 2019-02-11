@@ -3,11 +3,13 @@ import parse from './parser'
 import omit from 'lodash/omit'
 import merge from 'lodash/merge'
 import get from 'lodash/get'
-import map from 'lodash/map'
+import flatMap from 'lodash/flatMap'
 import isArray from 'lodash/isArray'
 import concat from 'lodash/concat'
+import mapValues from 'lodash/mapValues'
 import compact from 'lodash/compact'
 import styled from 'styled-components'
+import {findRight} from './position'
 
 export const FormulateContext = React.createContext()
 
@@ -36,10 +38,19 @@ const DenumeratorStyled = styled.span`
 
 const FormulaTree = ({tree}) => {
   const evaluatedTree = evalTree(tree, renderTree)
-  return <div>
-    {evaluatedTree}
-  </div>
+  return <FormulateContext.Consumer>
+    {({updateRefs}) => (
+      <div ref={(elref) => updateRefs("frame", elref)}>
+        {evaluatedTree}
+      </div>)}
+  </FormulateContext.Consumer>
 }
+
+const getRectanglesHash = (refs) =>
+  mapValues(refs, el => {
+    const r = el.getBoundingClientRect()
+    return [r.top, r.right, r.bottom, r.left]
+  })
 
 class Formulate extends React.Component {
   refs = {}
@@ -58,7 +69,7 @@ class Formulate extends React.Component {
 
   onFocus = () =>
     this.setState((state) => ({
-      tree: concat(get(state, 'tree'), [CURSOR])
+      tree: concat([CURSOR], get(state, 'tree'))
     }))
 
   onBlur = () =>
@@ -66,9 +77,19 @@ class Formulate extends React.Component {
       tree: evalTree(get(state, 'tree'), removeCursor)
     }))
 
+  onKeyDown = ({key}) => {
+    switch(true) {
+      case key=="ArrowRight": console.log(findRight(getRectanglesHash(this.refs)))
+    }
+  }
+
   render() {
     return <FormulateContext.Provider value={{updateRefs: this.updateRefs}}>
-      <StyledInput onFocus={this.onFocus} onBlur={this.onBlur} />
+      <StyledInput
+        onFocus={this.onFocus}
+        onBlur={this.onBlur}
+        onKeyDown={this.onKeyDown}
+      />
       <FormulaTree tree={this.state.tree} />
     </FormulateContext.Provider>
   }
@@ -89,7 +110,7 @@ const evalTree = (tree, applyTree) => {
 }
 
 const evalArray = (tree, applyTree) =>
-  compact(map(tree, el => evalTree(el, applyTree)))
+  compact(flatMap(tree, el => evalTree(el, applyTree)))
 
 const evalFrac = (tree, applyTree) => {
   const numerator = evalTree(get(tree, 'numerator'), applyTree)
@@ -159,3 +180,9 @@ const renderSymbol = (el) => {
       >{value}</span>)}
   </FormulateContext.Consumer>
 }
+
+// Moving functions
+const insertCursorLeft = (tree, id) => evalTree(tree,
+  el => get(el,'id') == id
+    ? [CURSOR, el]
+    : el)

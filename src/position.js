@@ -5,6 +5,7 @@ import get from 'lodash/fp/get'
 import find from 'lodash/fp/find'
 import isEqual from 'lodash/fp/isEqual'
 import findKey from 'lodash/findKey'
+import values from 'lodash/values'
 
 const enclosingRectangles = (pos, rectangles) => {
   const [t, r, b, l] = pos
@@ -187,3 +188,28 @@ export const closestBottom = (pos, rectangles) => {
 
 export const findRef = (pos, rectanglesHash) =>
   findKey(rectanglesHash, rec => isEqual(rec, pos))
+
+export const findRight = (rectanglesHash) => {
+  const rectangles = values(rectanglesHash)
+  const cursorRec = get('cursor', rectanglesHash)
+  const closestRec = findClosestRectangle(cursorRec, rectangles)
+  const inRec = rectanglesInRectangle(closestRec, rectangles)
+  const fstRight = firstRight(cursorRec, inRec) || []
+  const fstBottom = firstBottom(cursorRec, inRec) || []
+  const innerRight = firstInRectangle(fstRight, rectangles)
+  const innerBottom = firstInRectangle(fstBottom, rectangles)
+  const refInnerRight = findRef(innerRight, rectanglesHash)
+  const refInnerBottom = findRef(innerBottom, rectanglesHash)
+  const refBottom = findRef(fstBottom, rectanglesHash)
+  const refRight = findRef(fstRight, rectanglesHash)
+  const refClosestRec = findRef(closestRec, rectanglesHash)
+
+  switch (true) {
+    case !!refInnerRight: return [refInnerRight, 'left']
+    case !!refRight: return [refRight, 'right']
+    case !!refInnerBottom: return [refInnerBottom, 'left']
+    case !!refBottom: return [refBottom, 'left']
+    case !!refClosestRec: return [refClosestRec, 'right']
+  }
+
+}
