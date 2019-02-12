@@ -74,12 +74,17 @@ class Formulate extends React.Component {
 
   onBlur = () =>
     this.setState((state) => ({
-      tree: evalTree(get(state, 'tree'), removeCursor)
+      tree: removeCursor(get(state, 'tree'))
     }))
 
   onKeyDown = ({key}) => {
     switch(true) {
-      case key=="ArrowRight": console.log(findRight(getRectanglesHash(this.refs)))
+      case key=="ArrowRight": {
+        const pos = findRight(getRectanglesHash(this.refs))
+        this.setState((state) => ({
+          tree: insertCursor(state.tree, pos)
+        }))
+      }
     }
   }
 
@@ -126,14 +131,6 @@ const evalInput = (tree) =>
 
 const evalSymbol = (tree, applyTree) =>
   applyTree(tree)
-
-
-const removeCursor = el => {
-  switch (true) {
-    case isCursor(el) : return undefined
-    default: return el
-  }
-}
 
 // Rendering
 const renderTree = el => {
@@ -186,3 +183,19 @@ const insertCursorLeft = (tree, id) => evalTree(tree,
   el => get(el,'id') == id
     ? [CURSOR, el]
     : el)
+
+const removeCursor = (tree) => evalTree(tree,
+  el => {
+    switch (true) {
+      case isCursor(el) : return undefined
+      default: return el
+    }
+  })
+
+const insertCursor = (tree, pos) => {
+  const cleanTree = removeCursor(tree)
+  const [id, dirrection] = pos
+  switch (dirrection) {
+    case 'left': return insertCursorLeft(cleanTree, id)
+  }
+}
