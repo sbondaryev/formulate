@@ -184,6 +184,11 @@ const insertCursorLeft = (tree, id) => evalTree(tree,
     ? [CURSOR, el]
     : el)
 
+const insertCursorRight = (tree, id) => evalTree(tree,
+  el => get(el,'id') == id
+    ? [el, CURSOR]
+    : el)
+
 const removeCursor = (tree) => evalTree(tree,
   el => {
     switch (true) {
@@ -197,5 +202,7 @@ const insertCursor = (tree, pos) => {
   const [id, dirrection] = pos
   switch (dirrection) {
     case 'left': return insertCursorLeft(cleanTree, id)
+    case 'right': return insertCursorRight(cleanTree, id)
+    default: return tree
   }
 }
