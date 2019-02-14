@@ -211,5 +211,28 @@ export const findRight = (rectanglesHash) => {
     case !!refBottom: return [refBottom, 'left']
     case !!refClosestRec: return [refClosestRec, 'right']
   }
+}
 
+export const findLeft = (rectanglesHash) => {
+  const rectangles = values(rectanglesHash)
+  const cursorRec = get('cursor', rectanglesHash)
+  const closestRec = findClosestRectangle(cursorRec, rectangles)
+  const inRec = rectanglesInRectangle(closestRec, rectangles)
+  const fstLeft = firstLeft(cursorRec, inRec) || []
+  const fstTop = firstTop(cursorRec, inRec) || []
+  const innerLeft = lastInRectangle(fstLeft, rectangles)
+  const innerTop = firstInRectangle(fstTop, rectangles)
+  const refInnerLeft = findRef(innerLeft, rectanglesHash)
+  const refInnerTop = findRef(innerTop, rectanglesHash)
+  const refTop = findRef(fstTop, rectanglesHash)
+  const refLeft = findRef(fstLeft, rectanglesHash)
+  const refClosestRec = findRef(closestRec, rectanglesHash)
+
+  switch (true) {
+    case !!refInnerLeft: return [refInnerLeft, 'right']
+    case !!refLeft: return [refLeft, 'left']
+    case !!refInnerTop: return [refInnerTop, 'right']
+    case !!refTop: return [refTop, 'right']
+    case !!refClosestRec: return [refClosestRec, 'left']
+  }
 }
