@@ -69,7 +69,7 @@ class Formulate extends React.Component {
 
   onFocus = () =>
     this.setState((state) => ({
-      tree: concat([CURSOR], get(state, 'tree'))
+      tree: concat(get(state, 'tree'), [CURSOR])
     }))
 
   onBlur = () =>
