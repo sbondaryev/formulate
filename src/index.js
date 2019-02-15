@@ -9,7 +9,7 @@ import concat from 'lodash/concat'
 import mapValues from 'lodash/mapValues'
 import compact from 'lodash/compact'
 import styled from 'styled-components'
-import {findRight, findLeft, findTop} from './position'
+import {findRight, findLeft, findTop, findBottom} from './position'
 
 export const FormulateContext = React.createContext()
 
@@ -95,6 +95,13 @@ class Formulate extends React.Component {
       }
       case key=="ArrowUp": {
         const pos = findTop(getRectanglesHash(this.refs))
+        this.setState((state) => ({
+          tree: insertCursor(state.tree, pos)
+        }))
+        break
+      }
+      case key=="ArrowDown": {
+        const pos = findBottom(getRectanglesHash(this.refs))
         this.setState((state) => ({
           tree: insertCursor(state.tree, pos)
         }))
