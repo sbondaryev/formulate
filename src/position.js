@@ -236,3 +236,13 @@ export const findLeft = (rectanglesHash) => {
     case !!refClosestRec: return [refClosestRec, 'left']
   }
 }
+
+export const findTop = (rectanglesHash) => {
+  const rectangles = values(rectanglesHash)
+  const cursorRec = get('cursor', rectanglesHash)
+  const closestRec = findClosestRectangle2(cursorRec, rectangles)
+  const inRec = rectanglesInRectangleAll(closestRec, rectangles)
+  const [clstTop, insertMode] = closestTop(cursorRec, inRec)
+  const refClstTop = findRef(clstTop, rectanglesHash)
+  return [refClstTop, insertMode]
+}
