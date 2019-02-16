@@ -256,3 +256,19 @@ export const findBottom = (rectanglesHash) => {
   const refClstBottom = findRef(clstBottom, rectanglesHash)
   return [refClstBottom, insertMode]
 }
+
+const closestOuter = (point, rectangles) => {
+  const [x, y] = point
+  const rec = findClosestRectangle([y, x, y, x], rectangles)
+  const [rt, rr, rb, rl] = rec
+  return distance(x, y, rl, rb) < distance(x, y, rr, rb)
+    ? [rec, 'left']
+    : [rec, 'right']
+}
+
+export const findOuter = (point, rectanglesHash) => {
+  const rectangles = values(rectanglesHash)
+  const [clst, insertMode] = closestOuter(point, rectangles)
+  const refClst = findRef(clst, rectanglesHash)
+  return [refClst, insertMode]
+}
