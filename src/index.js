@@ -9,7 +9,7 @@ import concat from 'lodash/concat'
 import mapValues from 'lodash/mapValues'
 import compact from 'lodash/compact'
 import styled from 'styled-components'
-import {findRight, findLeft, findTop, findBottom} from './position'
+import {findRight, findLeft, findTop, findBottom, findOuter} from './position'
 
 export const FormulateContext = React.createContext()
 
@@ -36,11 +36,13 @@ const DenumeratorStyled = styled.span`
   border-top: 1px solid;
 `
 
-const FormulaTree = ({tree}) => {
+const FormulaTree = ({tree, onClick}) => {
   const evaluatedTree = evalTree(tree, renderTree)
   return <FormulateContext.Consumer>
     {({updateRefs}) => (
-      <div ref={(elref) => updateRefs("frame", elref)}>
+      <div
+        onClick={e => onClick([e.clientX, e.clientY])}
+        ref={(elref) => updateRefs("frame", elref)}>
         {evaluatedTree}
       </div>)}
   </FormulateContext.Consumer>
@@ -110,6 +112,13 @@ class Formulate extends React.Component {
     }
   }
 
+  onClick = (point) => {
+    const pos = findOuter(point, getRectanglesHash(this.refs))
+    this.setState((state) => ({
+      tree: insertCursor(state.tree, pos)
+    }))
+  }
+
   render() {
     return <FormulateContext.Provider value={{updateRefs: this.updateRefs}}>
       <StyledInput
@@ -117,7 +126,10 @@ class Formulate extends React.Component {
         onBlur={this.onBlur}
         onKeyDown={this.onKeyDown}
       />
-      <FormulaTree tree={this.state.tree} />
+      <FormulaTree
+        tree={this.state.tree}
+        onClick={this.onClick}
+      />
     </FormulateContext.Provider>
   }
 }
