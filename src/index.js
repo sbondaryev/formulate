@@ -69,10 +69,9 @@ class Formulate extends React.Component {
       : omit(this.refs, id)
   }
 
-  onFocus = () =>
-    this.setState((state) => ({
-      tree: concat(get(state, 'tree'), [CURSOR])
-    }))
+  updateInputRef = ref => {
+    this.inputref = ref
+  }
 
   onBlur = () =>
     this.setState((state) => ({
@@ -114,17 +113,17 @@ class Formulate extends React.Component {
 
   onClick = (point) => {
     const pos = findOuter(point, getRectanglesHash(this.refs))
-    this.setState((state) => ({
+    this.setState(state => ({
       tree: insertCursor(state.tree, pos)
-    }))
+    }), () => this.inputref.focus())
   }
 
   render() {
     return <FormulateContext.Provider value={{updateRefs: this.updateRefs}}>
       <StyledInput
-        onFocus={this.onFocus}
         onBlur={this.onBlur}
         onKeyDown={this.onKeyDown}
+        ref={this.updateInputRef}
       />
       <FormulaTree
         tree={this.state.tree}
