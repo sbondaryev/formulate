@@ -5,10 +5,10 @@ import merge from 'lodash/merge'
 import get from 'lodash/get'
 import flatMap from 'lodash/flatMap'
 import isArray from 'lodash/isArray'
-import concat from 'lodash/concat'
 import mapValues from 'lodash/mapValues'
 import compact from 'lodash/compact'
 import styled from 'styled-components'
+import uniqueId from 'lodash/uniqueId'
 import {findRight, findLeft, findTop, findBottom, findOuter} from './position'
 
 export const FormulateContext = React.createContext()
@@ -105,6 +105,12 @@ class Formulate extends React.Component {
         const pos = findBottom(getRectanglesHash(this.refs))
         this.setState((state) => ({
           tree: insertCursor(state.tree, pos)
+        }))
+        break
+      }
+      case /[1-9\+\-\*]/.test(key): {
+        this.setState((state) => ({
+          tree: insertElem(state.tree, key)
         }))
         break
       }
@@ -223,12 +229,14 @@ const insertCursorRight = (tree, id) => evalTree(tree,
     : el)
 
 const removeCursor = (tree) => evalTree(tree,
-  el => {
-    switch (true) {
-      case isCursor(el) : return undefined
-      default: return el
-    }
-  })
+  el => isCursor(el)
+    ? undefined
+    : el)
+
+const insertElem = (tree, key) => evalTree(tree,
+  el => isCursor(el)
+    ? [{id:uniqueId('G_'), type:'symbol', value:key}, el]
+    : el)
 
 const insertCursor = (tree, pos) => {
   const cleanTree = removeCursor(tree)
