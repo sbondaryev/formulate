@@ -80,6 +80,13 @@ class Formulate extends React.Component {
 
   onKeyDown = ({key}) => {
     switch(true) {
+      case key=="Backspace": {
+        const pos = findLeft(getRectanglesHash(this.refs))
+        this.setState((state) => ({
+          tree: backspaceCursor(state.tree, pos)
+        }))
+        break
+      }
       case key=="ArrowRight": {
         const pos = findRight(getRectanglesHash(this.refs))
         this.setState((state) => ({
@@ -218,6 +225,11 @@ const renderSymbol = (el) => {
 }
 
 // Moving functions
+const replaceWithCursor = (tree, id) => evalTree(tree,
+  el => get(el,'id') == id
+    ? CURSOR
+    : el)
+
 const insertCursorLeft = (tree, id) => evalTree(tree,
   el => get(el,'id') == id
     ? [CURSOR, el]
@@ -237,6 +249,16 @@ const insertElem = (tree, key) => evalTree(tree,
   el => isCursor(el)
     ? [{id:uniqueId('G_'), type:'symbol', value:key}, el]
     : el)
+
+const backspaceCursor = (tree, pos) => {
+  const cleanTree = removeCursor(tree)
+  const [id, dirrection] = pos
+  switch (dirrection) {
+    case 'left': return replaceWithCursor(cleanTree, id)
+    case 'right': return insertCursorRight(cleanTree, id)
+    default: return tree
+  }
+}
 
 const insertCursor = (tree, pos) => {
   const cleanTree = removeCursor(tree)
