@@ -121,6 +121,10 @@ class Formulate extends React.Component {
         }))
         break
       }
+      case key=="\\": {
+        console.log("insert input")
+        break
+      }
     }
   }
 
