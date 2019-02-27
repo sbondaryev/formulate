@@ -10,10 +10,12 @@ import compact from 'lodash/compact'
 import styled from 'styled-components'
 import uniqueId from 'lodash/uniqueId'
 import {findRight, findLeft, findTop, findBottom, findOuter} from './position'
+import InputContext from './input'
 
 export const FormulateContext = React.createContext()
 
 const CURSOR = {type: 'cursor'}
+const INPUT = {type: 'input'}
 
 const StyledInput = styled.input`
   color: red;
@@ -21,7 +23,7 @@ const StyledInput = styled.input`
 
 const isFrac = (el) => get(el, 'type') == 'frac'
 const isCursor = (el) => get(el, 'type') == 'cursor'
-const isInput = (el) => get(el, 'type') == 'formula-input'
+const isInput = (el) => get(el, 'type') == 'input'
 const isSymbol = (el) => get(el, 'type') == 'symbol'
 
 const FracStyled = styled.span`
@@ -122,7 +124,9 @@ class Formulate extends React.Component {
         break
       }
       case key=="\\": {
-        console.log("insert input")
+        this.setState((state) => ({
+          tree: insertInput(state.tree)
+        }))
         break
       }
     }
@@ -176,8 +180,8 @@ const evalFrac = (tree, applyTree) => {
 const evalCursor = (tree, applyTree) =>
   applyTree(tree)
 
-const evalInput = (tree) =>
-  tree
+const evalInput = (tree, applyTree) =>
+  applyTree(tree)
 
 const evalSymbol = (tree, applyTree) =>
   applyTree(tree)
@@ -188,6 +192,7 @@ const renderTree = el => {
     case isFrac(el) : return renderFrac(el)
     case isCursor(el) : return renderCursor(el)
     case isSymbol(el) : return renderSymbol(el)
+    case isInput(el) : return renderInput()
     default: return el
   }
 }
@@ -228,6 +233,10 @@ const renderSymbol = (el) => {
   </FormulateContext.Consumer>
 }
 
+const renderInput = () => {
+  return <InputContext onInput={v=>console.log(v)}/>
+}
+
 // Moving functions
 const replaceWithCursor = (tree, id) => evalTree(tree,
   el => get(el,'id') == id
@@ -242,6 +251,11 @@ const insertCursorLeft = (tree, id) => evalTree(tree,
 const insertCursorRight = (tree, id) => evalTree(tree,
   el => get(el,'id') == id
     ? [el, CURSOR]
+    : el)
+
+const insertInput = (tree) => evalTree(tree,
+  el => isCursor(el)
+    ? INPUT
     : el)
 
 const removeCursor = (tree) => evalTree(tree,
