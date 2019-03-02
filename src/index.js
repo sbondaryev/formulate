@@ -75,6 +75,15 @@ class Formulate extends React.Component {
     this.inputref = ref
   }
 
+  inputContext = content => {
+    this.setState((state) => ({
+      tree: removeInput(state.tree)
+    }),
+    () =>  {
+      console.log(content)
+    })
+  }
+
   onBlur = () =>
     this.setState((state) => ({
       tree: removeCursor(get(state, 'tree'))
@@ -140,7 +149,10 @@ class Formulate extends React.Component {
   }
 
   render() {
-    return <FormulateContext.Provider value={{updateRefs: this.updateRefs}}>
+    return <FormulateContext.Provider value={{
+      updateRefs: this.updateRefs,
+      inputContext: this.inputContext
+    }}>
       <StyledInput
         onBlur={this.onBlur}
         onKeyDown={this.onKeyDown}
@@ -192,7 +204,7 @@ const renderTree = el => {
     case isFrac(el) : return renderFrac(el)
     case isCursor(el) : return renderCursor(el)
     case isSymbol(el) : return renderSymbol(el)
-    case isInput(el) : return renderInput()
+    case isInput(el) : return renderInput(el)
     default: return el
   }
 }
@@ -233,8 +245,12 @@ const renderSymbol = (el) => {
   </FormulateContext.Consumer>
 }
 
-const renderInput = () => {
-  return <InputContext onInput={v=>console.log(v)}/>
+const renderInput = (el) => {
+  return <FormulateContext.Consumer  key={get(el, 'type')}>
+    {({inputContext}) => (
+      <InputContext onInput={inputContext}/>
+    )}
+  </FormulateContext.Consumer>
 }
 
 // Moving functions
@@ -256,6 +272,11 @@ const insertCursorRight = (tree, id) => evalTree(tree,
 const insertInput = (tree) => evalTree(tree,
   el => isCursor(el)
     ? INPUT
+    : el)
+
+const removeInput = (tree) => evalTree(tree,
+  el => isInput(el)
+    ? undefined
     : el)
 
 const removeCursor = (tree) => evalTree(tree,
